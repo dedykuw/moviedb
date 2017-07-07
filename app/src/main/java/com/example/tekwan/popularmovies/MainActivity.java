@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -24,8 +23,8 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler,AsyncTaskListenerInterface{
 
     private RecyclerView movieRecyclerView;
-    private ArrayList<Movie> moviesList = new ArrayList<>();
-    private RecyclerView.Adapter adapter;
+    private ArrayList<Movie> moviesList = new ArrayList<Movie>();
+    private MovieAdapter adapter;
     private ProgressBar progressBar;
     private AsyncTask dataAsyncTask;
 
@@ -43,12 +42,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         dataAsyncTask.execute("popular");
 
 
+
         movieRecyclerView = (RecyclerView) findViewById(R.id.movie_recyler);
         movieRecyclerView.setHasFixedSize(true);
         movieRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
 
         adapter = new MovieAdapter(this,moviesList,getApplicationContext());
+
         movieRecyclerView.setAdapter(adapter);
     }
 
@@ -89,8 +90,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     @Override
     public void returnData(List<Movie> moviesList) {
         progressBar.setVisibility(View.INVISIBLE);
-        for (Movie movie : moviesList) {
-            Log.i("TITLE: ", movie.getOriginalTitle());
-        }
+        movieRecyclerView.setVisibility(View.VISIBLE);
+        adapter.setMovieList(moviesList);
+
     }
 }
