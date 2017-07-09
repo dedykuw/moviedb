@@ -3,7 +3,9 @@
     <string name="popular">Popular</string>
     <string name="image_container_for_poster">image container for poster</string>
     <string name="top_rated">Top Rated</string>
-    <string name="released_at">Released at</string>
-    <string name="rating">Rating</string>
+    <string name="released_at">Released at </string>
+    <string name="rating">Rating </string>
     <string name="home">Home</string>
+    <string name="internet_problem">Opps failed to fetch data, please check your connection!</string>
+    <string name="refresh">Refresh</string>
 </resources>

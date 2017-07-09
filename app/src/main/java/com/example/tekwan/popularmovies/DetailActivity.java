@@ -11,13 +11,17 @@ import android.widget.TextView;
 import com.example.tekwan.popularmovies.DataModel.Movie;
 import com.squareup.picasso.Picasso;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class DetailActivity extends AppCompatActivity {
-    private ImageView poster;
-    private TextView title;
-    private TextView desc;
-    private TextView vote;
-    private TextView releaseDateView;
-    private RatingBar rate;
+    @BindView(R.id.poster) ImageView poster;
+    @BindView(R.id.title) TextView title;
+    @BindView(R.id.desc) TextView desc;
+    @BindView(R.id.vote) TextView vote;
+    @BindView(R.id.release_date) TextView releaseDateView;
+
+    @BindView(R.id.ratingBar) RatingBar rate;
 
     private String originalTitle;
     private String movieOverview;
@@ -29,18 +33,10 @@ public class DetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+        ButterKnife.bind(this);
 
         Intent intent = getIntent();
         Movie movie= intent.getParcelableExtra("movie");
-
-
-
-        poster = (ImageView) findViewById(R.id.poster);
-        title = (TextView) findViewById(R.id.title);
-        desc = (TextView) findViewById(R.id.desc);
-        vote = (TextView) findViewById(R.id.vote);
-        releaseDateView = (TextView) findViewById(R.id.release_date);
-        rate = (RatingBar) findViewById(R.id.ratingBar);
 
         rate.setNumStars(5);
         rate.setMax(5);
@@ -57,8 +53,8 @@ public class DetailActivity extends AppCompatActivity {
 
         title.setText(originalTitle);
         desc.setText(movieOverview);
-        vote.setText(getString(R.string.rating) +voteAverage.toString() +" from 10");
-        releaseDateView.setText(getString(R.string.released_at)+ releaseDate);
+        vote.setText(getString(R.string.rating)+" "+voteAverage.toString() +" from 10");
+        releaseDateView.setText(getString(R.string.released_at)+" "+releaseDate);
         rate.setRating((float) (voteAverage / 2));
 
         Picasso.with(DetailActivity.this)

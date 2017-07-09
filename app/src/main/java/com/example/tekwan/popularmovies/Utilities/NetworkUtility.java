@@ -78,13 +78,11 @@ public class NetworkUtility {
         try {
             if (sortMode.equals(SORT_BY_POPULAR)) {
                 Uri builtUri = Uri.parse(BASE_URL_POPULAR).buildUpon()
-                        .appendQueryParameter(QUERY_PARAM, sortMode)
                         .appendQueryParameter(API_KEY,MOVIE_DB_KEY)
                         .build();
                 url = new URL(builtUri.toString());
             } else if (sortMode.equals(SORT_BY_RATING)) {
                 Uri builtUri = Uri.parse(BASE_URL_TOP_RATED).buildUpon()
-                        .appendQueryParameter(QUERY_PARAM, sortMode)
                         .appendQueryParameter(API_KEY, MOVIE_DB_KEY)
                         .build();
                 url = new URL(builtUri.toString());

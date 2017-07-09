@@ -6,9 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RatingBar;
-import android.widget.TextView;
-
 import com.example.tekwan.popularmovies.DataModel.Movie;
 import com.example.tekwan.popularmovies.R;
 import com.squareup.picasso.Picasso;
@@ -45,14 +42,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     public class MovieAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private final ImageView imageView;
-        private final TextView titleText;
-        private final RatingBar ratingBar;
-
         public MovieAdapterViewHolder(View view) {
             super(view);
             imageView = (ImageView) view.findViewById(R.id.movieImage);
-            titleText = (TextView) view.findViewById(R.id.title);
-            ratingBar = (RatingBar) view.findViewById(R.id.ratingBar);
             view.setOnClickListener(this);
         }
 
@@ -85,9 +77,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
                 .load(movieView.getPosterUrl())
                 .placeholder(R.drawable.placeholder)
                 .into(holder.imageView);
-
-        holder.titleText.setText(movieView.getOriginalTitle());
-        holder.ratingBar.setRating((float) (movieView.getVoteAverage()/ 2));
     }
 
     @Override

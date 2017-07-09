@@ -42,6 +42,7 @@ public class DataAsyncTask extends AsyncTask<Object,Void,List<Movie>>{
         }
     }
 
+
     @Override
     protected void onPreExecute() {
         listener.preExecute();
@@ -50,9 +51,7 @@ public class DataAsyncTask extends AsyncTask<Object,Void,List<Movie>>{
 
     @Override
     protected void onPostExecute(List<Movie> movies) {
-        if (movies!= null) {
             listener.returnData(movies);
-        }
     }
 }
 
