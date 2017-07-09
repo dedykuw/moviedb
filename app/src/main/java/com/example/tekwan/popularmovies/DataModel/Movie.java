@@ -8,34 +8,11 @@ import android.os.Parcelable;
  */
 
 public class Movie implements Parcelable{
-    /**
-     * Image URL
-     */
     private String posterUrl;
-
-    /**
-     * Base URL for the poster
-     */
-    private String BASE_POSTER_URL = "http://image.tmdb.org/t/p/w185/";
-
-    /**
-     * Title of the movie
-     */
     private String originalTitle;
-
-    /**
-     * Overview of the movie
-     */
     private String movieOverview;
 
-    /**
-     * Movie rating
-     */
     private double voteAverage;
-
-    /**
-     * Movie release date
-     */
     private String releaseDate;
 
     public Movie(String posterUrl, String originalTitle, String movieOverview, Double voteAverage, String releaseDate) {
@@ -47,6 +24,7 @@ public class Movie implements Parcelable{
     }
 
     public String getPosterUrl() {
+        String BASE_POSTER_URL = "http://image.tmdb.org/t/p/w185/";
         return BASE_POSTER_URL + posterUrl;
     }
 
@@ -87,7 +65,7 @@ public class Movie implements Parcelable{
     }
 
 
-    protected Movie(Parcel in) {
+    private Movie(Parcel in) {
         posterUrl = in.readString();
         originalTitle = in.readString();
         movieOverview = in.readString();

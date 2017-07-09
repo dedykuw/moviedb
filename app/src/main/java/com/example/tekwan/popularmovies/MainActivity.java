@@ -1,7 +1,6 @@
 package com.example.tekwan.popularmovies;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -23,34 +22,28 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler,AsyncTaskListenerInterface{
 
     private RecyclerView movieRecyclerView;
-    private ArrayList<Movie> moviesList = new ArrayList<Movie>();
+    private ArrayList<Movie> moviesList;
     private MovieAdapter adapter;
     private ProgressBar progressBar;
-    private AsyncTask dataAsyncTask;
 
-    private static final String SORT_BY_POPULAR = "popular";
+    private static final String POPULAR = "popular";
+    private static final String RATING = "rating";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        moviesList = new ArrayList<Movie>();
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
-
-        dataAsyncTask = new DataAsyncTask(this);
-
-        dataAsyncTask.execute("popular");
-
-
-
-        movieRecyclerView = (RecyclerView) findViewById(R.id.movie_recyler);
+        movieRecyclerView = (RecyclerView) findViewById(R.id.movie_recycler);
         movieRecyclerView.setHasFixedSize(true);
         movieRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-
         adapter = new MovieAdapter(this,moviesList,getApplicationContext());
 
         movieRecyclerView.setAdapter(adapter);
+
+        loadData(POPULAR);
     }
 
     @Override
@@ -60,31 +53,40 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         return true;
     }
 
+    private void loadData(String type){
+
+        adapter.setMovieList(new ArrayList<Movie>());
+        new DataAsyncTask(this).execute(type);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
         if (id == R.id.popular){
+            loadData(POPULAR);
             return true;
         }
 
         if(id == R.id.top_rated){
+            loadData(RATING);
             return true;
-        };
+        }
         return super.onOptionsItemSelected(item);
 
     }
 
     @Override
     public void onClick(Movie posterClick) {
-        Intent intenteded = new Intent(MainActivity.this,DetailActivity.class);
-        intenteded.putExtra("movie",posterClick);
-        startActivity(intenteded);
+        Intent intended = new Intent(MainActivity.this,DetailActivity.class);
+        intended.putExtra("movie",posterClick);
+        startActivity(intended);
     }
 
     @Override
     public void preExecute() {
         progressBar.setVisibility(View.VISIBLE);
+        movieRecyclerView.setVisibility(View.INVISIBLE);
     }
 
     @Override

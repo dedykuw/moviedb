@@ -3,6 +3,7 @@
     package="com.example.tekwan.popularmovies">
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
+        android:fullBackupContent="true"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -17,6 +18,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".DetailActivity"></activity>
+        <meta-data
+            android:name="MovieDBKey"
+            android:value="{$MovieDBKey}"
+            />
     </application>
 
 </manifest>

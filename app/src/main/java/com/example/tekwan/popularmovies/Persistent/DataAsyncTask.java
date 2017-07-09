@@ -14,10 +14,7 @@ import com.example.tekwan.popularmovies.Utilities.NetworkUtility;
  */
 
 public class DataAsyncTask extends AsyncTask<Object,Void,List<Movie>>{
-
-    private static final String TAG = DataAsyncTask.class.getSimpleName();
-    private MovieAdapter adapter;
-    private AsyncTaskListenerInterface listener;
+    private final AsyncTaskListenerInterface listener;
 
     public DataAsyncTask(AsyncTaskListenerInterface listener) {
             this.listener = listener;
@@ -36,10 +33,7 @@ public class DataAsyncTask extends AsyncTask<Object,Void,List<Movie>>{
             String jsonMovieResponse = NetworkUtility
                     .makeHttpRequest(url);
 
-            List simpleJsonMovieData = NetworkUtility
-                    .extractFeatureFromJson(jsonMovieResponse);
-
-            return simpleJsonMovieData;
+            return NetworkUtility.extractFeatureFromJson(jsonMovieResponse);
 
 
         } catch (Exception e) {
@@ -57,7 +51,6 @@ public class DataAsyncTask extends AsyncTask<Object,Void,List<Movie>>{
     @Override
     protected void onPostExecute(List<Movie> movies) {
         if (movies!= null) {
-
             listener.returnData(movies);
         }
     }

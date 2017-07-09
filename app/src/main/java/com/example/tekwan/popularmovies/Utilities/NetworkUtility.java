@@ -19,6 +19,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.tekwan.popularmovies.BuildConfig;
 import com.example.tekwan.popularmovies.DataModel.Movie;
 
 /**
@@ -47,21 +48,19 @@ public class NetworkUtility {
 
     private static final String API_KEY = "api_key";
 
-    private static final String KEY = "65409a4df61d6e1cbe380f8e5c87b8ee";
-
-    final static String QUERY_PARAM = "q";
+    private final static String QUERY_PARAM = "q";
 
     private static final String BASE_URL_POPULAR = "https://api.themoviedb.org/3/movie/popular";
 
     private static final String BASE_URL_TOP_RATED = "https://api.themoviedb.org/3/movie/top_rated";
 
+    private static final String MOVIE_DB_KEY = BuildConfig.MovieDBKey;
 
-    public NetworkUtility() {
+
+    private NetworkUtility() {
     }
 
     private static List<Movie> fetchMoviesData(String requestUrl) {
-        // Create URL object
-        //   URL url = createUrl(requestUrl);
         URL url = buildUrl(requestUrl);
 
         // Perform HTTP request to the URL and receive a JSON response back
@@ -71,40 +70,22 @@ public class NetworkUtility {
         } catch (IOException e) {
             Log.e(LOG_TAG, "Problem making the HTTP request.", e);
         }
-
-        // Extract relevant fields from the JSON response and create a list of {@link Movie}s
-        List<Movie> moviesList = extractFeatureFromJson(jsonResponse);
-
-        // Return the list of {@link Movie}s
-        return moviesList;
+        return extractFeatureFromJson(jsonResponse);
     }
 
-
-    /**
-     * Returns new URL object from the given string URL.
-     */
-    //  public static URL createUrl(String stringUrl) {
-    //     URL url = null;
-    //     try {
-    //        url = new URL(stringUrl);
-    //    } catch (MalformedURLException e) {
-    //         return null;
-    //     }
-    //     return url;
-    //  }
     public static URL buildUrl(String sortMode) {
         URL url = null;
         try {
             if (sortMode.equals(SORT_BY_POPULAR)) {
                 Uri builtUri = Uri.parse(BASE_URL_POPULAR).buildUpon()
                         .appendQueryParameter(QUERY_PARAM, sortMode)
-                        .appendQueryParameter(API_KEY,KEY)
+                        .appendQueryParameter(API_KEY,MOVIE_DB_KEY)
                         .build();
                 url = new URL(builtUri.toString());
             } else if (sortMode.equals(SORT_BY_RATING)) {
                 Uri builtUri = Uri.parse(BASE_URL_TOP_RATED).buildUpon()
                         .appendQueryParameter(QUERY_PARAM, sortMode)
-                        .appendQueryParameter(API_KEY, KEY)
+                        .appendQueryParameter(API_KEY, MOVIE_DB_KEY)
                         .build();
                 url = new URL(builtUri.toString());
             }

@@ -2,11 +2,12 @@ package com.example.tekwan.popularmovies.Layout;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RatingBar;
+import android.widget.TextView;
 
 import com.example.tekwan.popularmovies.DataModel.Movie;
 import com.example.tekwan.popularmovies.R;
@@ -20,9 +21,9 @@ import java.util.List;
  */
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder> {
-    private ArrayList<Movie> moviesList;
-    private Context context;
-    private MovieAdapterOnClickHandler mClickHandler;
+    private final ArrayList<Movie> moviesList;
+    private final Context context;
+    private final MovieAdapterOnClickHandler mClickHandler;
 
 
     public MovieAdapter(MovieAdapterOnClickHandler clickHandler, ArrayList<Movie> moviesList, Context context) {
@@ -33,6 +34,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
 
     public void setMovieList(List<Movie> mMovieList) {
+        if (this.moviesList.size() > 0) this.moviesList.clear();
         this.moviesList.addAll(mMovieList);
         notifyDataSetChanged();
     }
@@ -42,12 +44,15 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
     public class MovieAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        public ImageView imageView;
+        private final ImageView imageView;
+        private final TextView titleText;
+        private final RatingBar ratingBar;
 
         public MovieAdapterViewHolder(View view) {
             super(view);
-
             imageView = (ImageView) view.findViewById(R.id.movieImage);
+            titleText = (TextView) view.findViewById(R.id.title);
+            ratingBar = (RatingBar) view.findViewById(R.id.ratingBar);
             view.setOnClickListener(this);
         }
 
@@ -78,14 +83,16 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
         Picasso.with(context)
                 .load(movieView.getPosterUrl())
-                .resize(300, 450)
-                .centerCrop()
+                .placeholder(R.drawable.placeholder)
                 .into(holder.imageView);
+
+        holder.titleText.setText(movieView.getOriginalTitle());
+        holder.ratingBar.setRating((float) (movieView.getVoteAverage()/ 2));
     }
 
     @Override
     public int getItemCount() {
         if (null == moviesList) return 0;
         return moviesList.size();
-    };
+    }
 }
