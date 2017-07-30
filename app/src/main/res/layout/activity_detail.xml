@@ -75,6 +75,20 @@
                     android:isIndicator="true"
                     android:scaleX="0.4"
                     android:scaleY="0.4" />
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/star"
+                    android:onClick="favoriteThis"
+                    android:visibility="gone"
+                    android:id="@+id/unfavorite"/>
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/starfilld"
+                    android:onClick="unFavoriteThis"
+                    android:visibility="gone"
+                    android:id="@+id/favorited"/>
             </LinearLayout>
 
         </LinearLayout>
@@ -92,6 +106,42 @@
             android:layout_height="wrap_content"
             android:fontFamily="casual"
             android:maxLines="10"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Subhead"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:text="@string/trailer"
+            android:fontFamily="casual"
+            android:layout_marginTop="2dp"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:padding="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:id="@+id/trailer_recycler"
+            ></android.support.v7.widget.RecyclerView>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Subhead"
+            android:textSize="15sp"
+            android:text="@string/review"
+            android:fontFamily="casual"
+            android:textStyle="bold"
+            android:layout_marginTop="2dp"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:padding="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="vertical"
+            android:id="@+id/review_recycler"
+            ></android.support.v7.widget.RecyclerView>
+
         <Button
             android:id="@+id/button"
             style="@style/Widget.AppCompat.Button.Colored"

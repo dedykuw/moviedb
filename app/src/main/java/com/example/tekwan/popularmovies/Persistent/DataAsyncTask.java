@@ -6,7 +6,6 @@ import java.net.URL;
 import java.util.List;
 
 import com.example.tekwan.popularmovies.DataModel.Movie;
-import com.example.tekwan.popularmovies.Layout.MovieAdapter;
 import com.example.tekwan.popularmovies.Utilities.NetworkUtility;
 
 /**

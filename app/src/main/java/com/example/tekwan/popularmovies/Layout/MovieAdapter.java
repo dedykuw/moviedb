@@ -9,8 +9,6 @@ import android.widget.ImageView;
 import com.example.tekwan.popularmovies.DataModel.Movie;
 import com.example.tekwan.popularmovies.R;
 import com.squareup.picasso.Picasso;
-
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,12 +16,12 @@ import java.util.List;
  */
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder> {
-    private final ArrayList<Movie> moviesList;
+    private List<Movie> moviesList;
     private final Context context;
     private final MovieAdapterOnClickHandler mClickHandler;
 
 
-    public MovieAdapter(MovieAdapterOnClickHandler clickHandler, ArrayList<Movie> moviesList, Context context) {
+    public MovieAdapter(MovieAdapterOnClickHandler clickHandler, List<Movie> moviesList, Context context) {
         this.moviesList = moviesList;
         this.context = context;
         mClickHandler = clickHandler;
@@ -35,6 +33,10 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         this.moviesList.addAll(mMovieList);
         notifyDataSetChanged();
     }
+    public void addMovieList(List<Movie> movies){
+        this.moviesList.addAll(movies);
+        notifyDataSetChanged();
+    }
     public interface MovieAdapterOnClickHandler {
         void onClick(Movie posterClick);
     }
@@ -42,9 +44,11 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     public class MovieAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private final ImageView imageView;
+        private final ImageView favorite;
         public MovieAdapterViewHolder(View view) {
             super(view);
             imageView = (ImageView) view.findViewById(R.id.movieImage);
+            favorite = (ImageView) view.findViewById(R.id.image_favorite);
             view.setOnClickListener(this);
         }
 
@@ -53,6 +57,17 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
             int adapterPosition = getAdapterPosition();
             Movie posterClick = moviesList.get(adapterPosition);
             mClickHandler.onClick(posterClick);
+        }
+        public void setData(Movie movie){
+            Picasso.with(context)
+                    .load(movie.getPosterUrl())
+                    .placeholder(R.drawable.placeholder)
+                    .into(imageView);
+            if (movie.getFavorite()){
+                favorite.setVisibility(View.VISIBLE);
+            }else {
+                favorite.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -72,11 +87,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     @Override
     public void onBindViewHolder(MovieAdapterViewHolder holder, int position) {
         final Movie movieView = moviesList.get(position);
-
-        Picasso.with(context)
-                .load(movieView.getPosterUrl())
-                .placeholder(R.drawable.placeholder)
-                .into(holder.imageView);
+        holder.setData(movieView);
     }
 
     @Override

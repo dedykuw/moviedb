@@ -9,7 +9,9 @@ import java.util.List;
  */
 
 public interface AsyncTaskListenerInterface {
+    Boolean isShowFavorite();
     void returnData(List<Movie> mMovieList);
+    void addData(List<Movie> movies);
     void preExecute();
 
 }

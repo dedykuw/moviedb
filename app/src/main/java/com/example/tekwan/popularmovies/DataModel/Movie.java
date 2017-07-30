@@ -11,21 +11,34 @@ public class Movie implements Parcelable{
     private String posterUrl;
     private String originalTitle;
     private String movieOverview;
-
+    private Boolean isFavorite;
     private double voteAverage;
     private String releaseDate;
 
-    public Movie(String posterUrl, String originalTitle, String movieOverview, Double voteAverage, String releaseDate) {
+    private String movieId;
+
+    public Movie(String posterUrl, String originalTitle, String movieOverview, Double voteAverage, String releaseDate,String id) {
         this.posterUrl = posterUrl;
         this.originalTitle = originalTitle;
         this.movieOverview = movieOverview;
         this.voteAverage = voteAverage;
         this.releaseDate = releaseDate;
+        this.movieId = id;
     }
 
     public String getPosterUrl() {
         String BASE_POSTER_URL = "http://image.tmdb.org/t/p/w185/";
         return BASE_POSTER_URL + posterUrl;
+    }
+    public String getPosterName(){
+        return posterUrl;
+    }
+    public String getMovieId() {
+        return movieId;
+    }
+
+    public void setMovieId(String movieId) {
+        this.movieId = movieId;
     }
 
     public void setPosterUrl(String poster) {
@@ -71,6 +84,7 @@ public class Movie implements Parcelable{
         movieOverview = in.readString();
         voteAverage = in.readDouble();
         releaseDate = in.readString();
+        movieId = in.readString();
     }
 
     @Override
@@ -80,12 +94,12 @@ public class Movie implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-
         dest.writeString(posterUrl);
         dest.writeString(originalTitle);
         dest.writeString(movieOverview);
         dest.writeDouble(voteAverage);
         dest.writeString(releaseDate);
+        dest.writeString(movieId);
     }
 
 
@@ -101,4 +115,12 @@ public class Movie implements Parcelable{
             return new Movie[size];
         }
     };
+
+    public Boolean getFavorite() {
+        return isFavorite;
+    }
+
+    public void setFavorite(Boolean favorite) {
+        isFavorite = favorite;
+    }
 }
