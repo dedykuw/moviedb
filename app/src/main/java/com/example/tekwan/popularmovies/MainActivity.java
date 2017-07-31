@@ -2,11 +2,11 @@ package com.example.tekwan.popularmovies;
 
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.Parcelable;
 import android.support.v4.app.LoaderManager;
 import android.content.Intent;
-import android.support.v4.content.CursorLoader;
+import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -24,7 +24,7 @@ import android.widget.Toast;
 
 import com.example.tekwan.popularmovies.DataModel.Movie;
 import com.example.tekwan.popularmovies.Database.Contract.MovieFavoriteContract;
-import com.example.tekwan.popularmovies.Database.DBFetcher.FavoriteDBFetcher;
+import com.example.tekwan.popularmovies.Database.DBAction.FavoriteDBAction;
 import com.example.tekwan.popularmovies.Database.Helper.FavoriteDBHelper;
 import com.example.tekwan.popularmovies.Layout.MovieAdapter;
 import com.example.tekwan.popularmovies.Persistent.AsyncTaskListenerInterface;
@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final String SEARCH_QUERY_URL_EXTRA = "query";
     private static final int SEARCH_LOADER = 33;
     private static final int FAVORITE_LOADER = 34;
+    private static final String LIST_STATE_KEY = "scrollstate" ;
     private final LoaderManager loaderManager = getSupportLoaderManager();
 
     @BindView(R.id.progress_bar) ProgressBar progressBar;
@@ -63,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements
     private LoaderManager.LoaderCallbacks<Cursor> dbFavoriteLoader;
 
     private Bundle savedState;
+    Parcelable mListState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,6 +121,11 @@ public class MainActivity extends AppCompatActivity implements
         super.onResume();
         setPreferences();
         loadData();
+    }
+    private void restoreScrollState(){
+        if (mListState != null) {
+            layoutManager.onRestoreInstanceState(mListState);
+        }
     }
 
     private void setPreferences() {
@@ -202,6 +209,7 @@ public class MainActivity extends AppCompatActivity implements
         if (moviesLists!= null) {
             finishFetchExection();
             adapter.setMovieList(moviesLists);
+            restoreScrollState();
         }else {
             Toast.makeText(MainActivity.this, R.string.internet_problem,Toast.LENGTH_LONG).show();
             loadFromProvider();
@@ -243,7 +251,16 @@ public class MainActivity extends AppCompatActivity implements
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(SEARCH_QUERY_URL_EXTRA,savedState.getString(SEARCH_QUERY_URL_EXTRA));
+        mListState = layoutManager.onSaveInstanceState();
+        outState.putParcelable(LIST_STATE_KEY, mListState);
 
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if(savedInstanceState != null)
+            mListState = savedInstanceState.getParcelable(LIST_STATE_KEY);
     }
 
     @Override
@@ -255,30 +272,39 @@ public class MainActivity extends AppCompatActivity implements
     private void loadFromProvider(){
         LoaderManager loaderManager = getSupportLoaderManager();
         dbFavoriteLoader = new LoaderManager.LoaderCallbacks<Cursor>(){
-
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                Uri uri = MovieFavoriteContract.FavoriteEntry.CONTENT_URI;
-                return new CursorLoader(MainActivity.this,uri,null,null,null,null);
-            }
+                final Uri uri = MovieFavoriteContract.FavoriteEntry.CONTENT_URI;
+                    return new AsyncTaskLoader<Cursor>(MainActivity.this) {
+                        @Override
+                        public Cursor loadInBackground() {
+                            try {
+                                return getContentResolver().query(uri,
+                                        null,
+                                        null,
+                                        null,
+                                        null);
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                return null;
+                            }
+                        }
+                    };
+                }
 
             @Override
             public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-                addData(FavoriteDBFetcher.convertCursorToListMovie(data));
+                addData(FavoriteDBAction.convertCursorToListMovie(data));
             }
-
             @Override
             public void onLoaderReset(Loader<Cursor> loader) {
 
             }
         };
 
-        Loader<String> dataLoader = loaderManager.getLoader(FAVORITE_LOADER);
-        if (dataLoader == null){
-            loaderManager.initLoader(FAVORITE_LOADER, null, dbFavoriteLoader).forceLoad();
-        }else {
-            loaderManager.initLoader(FAVORITE_LOADER, null, dbFavoriteLoader).forceLoad();
-        }
+        loaderManager.initLoader(FAVORITE_LOADER, null, dbFavoriteLoader).forceLoad();
+
 
     }
 }

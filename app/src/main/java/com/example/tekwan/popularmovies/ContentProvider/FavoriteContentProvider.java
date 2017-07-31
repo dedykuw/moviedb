@@ -1,16 +1,19 @@
 package com.example.tekwan.popularmovies.ContentProvider;
 
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.example.tekwan.popularmovies.Database.Contract.MovieFavoriteContract;
-import com.example.tekwan.popularmovies.Database.DBFetcher.FavoriteDBFetcher;
+import com.example.tekwan.popularmovies.Database.DBAction.FavoriteDBAction;
 import com.example.tekwan.popularmovies.Database.Helper.FavoriteDBHelper;
 
 /**
@@ -21,8 +24,8 @@ public class FavoriteContentProvider extends ContentProvider{
 
     private FavoriteDBHelper favoriteDBHelper;
 
-    private static final int FAVORITES= 300;
-    private static final int FAVORITES_WITH_ID = 301;
+    private static final int FAVORITES= 100;
+    private static final int FAVORITES_WITH_ID = 101;
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private Context context;
 
@@ -45,12 +48,15 @@ public class FavoriteContentProvider extends ContentProvider{
     @Override
     public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
         int matched = sUriMatcher.match(uri);
+
         Cursor retCursor = null;
         switch (matched){
             case FAVORITES :
-                retCursor = FavoriteDBFetcher.fetchAll(context);
+                retCursor = FavoriteDBAction.fetchAll(context);
                 break;
             case FAVORITES_WITH_ID :
+                String id = uri.getPathSegments().get(1);
+                retCursor = FavoriteDBAction.getOne(context,id);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknow uri: "+ uri);
@@ -69,12 +75,31 @@ public class FavoriteContentProvider extends ContentProvider{
     @Nullable
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
-        return null;
+
+        int matched = sUriMatcher.match(uri);
+        Uri returnedUri;
+
+        switch (matched){
+            case FAVORITES :
+                long id = FavoriteDBAction.insertRow(values,context);
+                if (id > 0){
+                    returnedUri = ContentUris.withAppendedId(MovieFavoriteContract.FavoriteEntry.CONTENT_URI,id);
+                }else {
+                    throw new SQLException("Failed to instert row "+uri);
+                }
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknow uri: "+ uri);
+
+        }
+        getContext().getContentResolver().notifyChange(uri,null);
+        return returnedUri;
     }
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
-        return 0;
+        String id = uri.getPathSegments().get(1);
+        return FavoriteDBAction.deleteRow(context,id);
     }
 
     @Override

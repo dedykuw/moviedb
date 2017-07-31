@@ -1,8 +1,10 @@
-package com.example.tekwan.popularmovies.Database.DBFetcher;
+package com.example.tekwan.popularmovies.Database.DBAction;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.tekwan.popularmovies.DataModel.Movie;
 import com.example.tekwan.popularmovies.Database.Contract.MovieFavoriteContract;
@@ -15,7 +17,7 @@ import java.util.List;
  * Created by tekwan on 7/30/2017.
  */
 
-public class FavoriteDBFetcher {
+public class FavoriteDBAction {
 
     public static List<Movie> convertCursorToListMovie(Cursor movieCursor){
 
@@ -36,6 +38,33 @@ public class FavoriteDBFetcher {
             }while(movieCursor.moveToNext());
         }
         return movies;
+    }
+    public static Cursor getOne(Context context, String movieId){
+
+        FavoriteDBHelper favoriteDBHelper = new FavoriteDBHelper(context);
+        SQLiteDatabase db = favoriteDBHelper.getReadableDatabase();
+        String[] projection = {
+                MovieFavoriteContract.FavoriteEntry._ID,
+                MovieFavoriteContract.FavoriteEntry.COLUMN_TITLE,
+                MovieFavoriteContract.FavoriteEntry.COLUMN_MOVIE_DB_ID,
+                MovieFavoriteContract.FavoriteEntry.COLUMN_RELEASED_DATE,
+                MovieFavoriteContract.FavoriteEntry.COLUMN_OVERVIEW,
+                MovieFavoriteContract.FavoriteEntry.COLUMN_POSTER,
+                MovieFavoriteContract.FavoriteEntry.COLUMN_RATING,
+        };
+
+        String selection = MovieFavoriteContract.FavoriteEntry.COLUMN_MOVIE_DB_ID + " = ?";
+        String[] selectionArgs = { movieId };
+
+        return db.query(
+                MovieFavoriteContract.FavoriteEntry.TABLE_NAME,                     // The table to query
+                projection,                               // The columns to return
+                selection,                                // The columns for the WHERE clause
+                selectionArgs,                            // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                null                                 // The sort order
+        );
     }
     public static Cursor fetchAll(Context context){
         FavoriteDBHelper favoriteDBHelper = new FavoriteDBHelper(context);
@@ -61,5 +90,20 @@ public class FavoriteDBFetcher {
                 null                                 // The sort order
         );
         return movieCursor;
+    }
+    public static long insertRow(ContentValues values,Context context){
+        FavoriteDBHelper favoriteDBHelper = new FavoriteDBHelper(context);
+        SQLiteDatabase db = favoriteDBHelper.getReadableDatabase();
+        long newRowId = db.insert(MovieFavoriteContract.FavoriteEntry.TABLE_NAME, null, values);
+        return newRowId;
+    }
+    public static int deleteRow(Context context,String movieId){
+        SQLiteOpenHelper favoriteDBHelper = new FavoriteDBHelper(context);
+        SQLiteDatabase db = favoriteDBHelper.getWritableDatabase();
+        String selection = MovieFavoriteContract.FavoriteEntry.COLUMN_MOVIE_DB_ID + " LIKE ?";
+        String[] selectionArgs = { movieId };
+
+        int result = db.delete(MovieFavoriteContract.FavoriteEntry.TABLE_NAME, selection, selectionArgs);
+        return  result;
     }
 }

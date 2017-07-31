@@ -1,6 +1,7 @@
 package com.example.tekwan.popularmovies;
 
 import android.content.ActivityNotFoundException;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -8,17 +9,21 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Parcelable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.tekwan.popularmovies.DataModel.Movie;
 import com.example.tekwan.popularmovies.DataModel.Review;
@@ -66,7 +71,11 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
 
     private ReviewAdapter reviewAdapter;
     private TrailerAdapter trailerAdapter;
-    private FavoriteDBHelper favoriteDBHelper;
+
+    private static final String SCROLL_ID = "scrollview";
+    public static int scrollX = 0;
+    public static int scrollY = -1;
+    private ScrollView scrollView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,13 +97,23 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
         movieId = movie.getMovieId();
         posterName = movie.getPosterName();
 
-        favoriteDBHelper = new FavoriteDBHelper(this);
         loaderManager = getSupportLoaderManager();
-
+        scrollView = (ScrollView) findViewById(R.id.scroll_view) ;
         init();
-        initLoader();
+    }
+    @Override
+    protected void onPause(){
+        super.onPause();
+        scrollX = scrollView.getScrollX();
+        scrollY = scrollView.getScrollY();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initLoader();
+
+    }
     private void initLoader() {
         initTrailerLoader();
         initReviewLoader();
@@ -121,6 +140,8 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
             @Override
             public void onLoadFinished(Loader<List<Review>> loader, List<Review> data) {
                 reviewAdapter.setReviewsData(data);
+                restoreScrollState(new int[] {scrollX,scrollY});
+
             }
 
             @Override
@@ -165,27 +186,9 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
 
     }
     private boolean getFavorite(){
-        SQLiteDatabase db = favoriteDBHelper.getReadableDatabase();
-        String[] projection = {
-                MovieFavoriteContract.FavoriteEntry._ID
-        };
-
-        String selection = MovieFavoriteContract.FavoriteEntry.COLUMN_MOVIE_DB_ID + " = ?";
-        String[] selectionArgs = { movieId };
-
-
-        Cursor c = db.query(
-                MovieFavoriteContract.FavoriteEntry.TABLE_NAME,                     // The table to query
-                projection,                               // The columns to return
-                selection,                                // The columns for the WHERE clause
-                selectionArgs,                            // The values for the WHERE clause
-                null,                                     // don't group the rows
-                null,                                     // don't filter by row groups
-                null                                 // The sort order
-        );
-        Boolean returnData = c.getCount() > 0;
-        c.close();
-        return returnData;
+            Uri uri = MovieFavoriteContract.FavoriteEntry.CONTENT_URI.buildUpon().appendPath(movieId).build();
+            Cursor retData = getContentResolver().query(uri,null, MovieFavoriteContract.FavoriteEntry.COLUMN_MOVIE_DB_ID+"=?", new String[]{movieId},null);
+            return retData.getCount() > 0;
     }
     private void init(){
 
@@ -243,7 +246,6 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
             }
         }).start();
 
-        SQLiteDatabase db = favoriteDBHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(MovieFavoriteContract.FavoriteEntry.COLUMN_MOVIE_DB_ID, movieId);
         values.put(MovieFavoriteContract.FavoriteEntry.COLUMN_TITLE, originalTitle);
@@ -252,12 +254,11 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
         values.put(MovieFavoriteContract.FavoriteEntry.COLUMN_RELEASED_DATE, releaseDate);
         values.put(MovieFavoriteContract.FavoriteEntry.COLUMN_OVERVIEW, movieOverview);
         values.put(MovieFavoriteContract.FavoriteEntry.COLUMN_POSTER, posterName);
-        long newRowId = db.insert(MovieFavoriteContract.FavoriteEntry.TABLE_NAME, null, values);
-        if (newRowId > 0){
-            unfavorite.setVisibility(View.GONE);
-            favorited.setVisibility(View.VISIBLE);
-        }
 
+        Uri uri = getContentResolver().insert(MovieFavoriteContract.FavoriteEntry.CONTENT_URI,values);
+        if (uri!= null){
+            Toast.makeText(getBaseContext(),uri.toString(),Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -273,15 +274,31 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
     }
 
     public void unFavoriteThis(View view) {
-
-        SQLiteDatabase db = favoriteDBHelper.getWritableDatabase();
-        String selection = MovieFavoriteContract.FavoriteEntry.COLUMN_MOVIE_DB_ID + " LIKE ?";
-        String[] selectionArgs = { movieId };
-        int result = db.delete(MovieFavoriteContract.FavoriteEntry.TABLE_NAME, selection, selectionArgs);
-
-        if (result > 0){
+        Uri uri = MovieFavoriteContract.FavoriteEntry.CONTENT_URI.buildUpon().appendPath(movieId).build();
+        int retData = getContentResolver().delete(uri,null, null);
+        if (retData > 0){
             favorited.setVisibility(View.GONE);
             unfavorite.setVisibility(View.VISIBLE);
+        }
+    }
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putIntArray(SCROLL_ID,
+                new int[]{ scrollView.getScrollX(), scrollView.getScrollY()});}
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        final int[] position = savedInstanceState.getIntArray(SCROLL_ID);
+        restoreScrollState(position);
+    }
+    private void restoreScrollState(int[] position){
+        final int[] positions = position;
+        if(positions != null){
+            Log.d("scroll", String.valueOf(positions[1]));
+            scrollView.scrollBy(positions[0], positions[1]);
         }
     }
 }
